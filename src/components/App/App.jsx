@@ -1,107 +1,107 @@
-import {useState, useEffect} from 'react';
+import { useEffect, useState } from 'react';
 import axios from 'axios';
 import './App.css';
 
-
 function App() {
   const [todoList, setTodoList] = useState([]);
-  const [newTodoDescription, setNewTodoDescription] = useState('');
+  const [newDescription, setNewDescription] = useState('');
 
+  useEffect(() => {
+    getData();
+  }, []);
 
-  useEffect(()=>{
-    fetchTasks()
-  })
-    function fetchTasks (){
+  function getData() {
     axios.get('/api/todo')
-          .then((response) => {
-              console.log(response.data);
-              setTodoList(response.data);
-          })
-          .catch((error) => {         
-  })
-}
-  const addTasks = (event) => {
-    event.preventDefault ();
-  const newTasks = {
-    description: newTodoDescription,
-    is_complete: false
+      .then(response => {
+
+        console.log('Displaying the data from db: ', response.data); 
+
+        setTodoList(response.data);
+      })
+      .catch(error => {
+        console.error('Error getting ToDo List from db', error);
+      });
   }
-  axios.post ('/api/todo', newTasks)
-  .then((response) => {
-    console.log(response);
-    setNewTodoDescription('');
 
-    fetchTasks();
-  })
-  .catch((error) => {
-    console.log(error);
-  })
-}
+  const addTodo = (event) => {
+    event.preventDefault();
+
+    const newTask = {
+      description: newDescription,
+      is_complete: false 
+    };
+
+    axios.post('/api/todo', newTask)
+      .then(() => {
+        getData(); 
+      })
+      .catch(error => {
+        console.error('Error adding new task', error);
+      });
+
+    setNewDescription(''); 
+  };
+
+  const markCompleted = (id) => {
+    axios.put(`/api/todo/${id}`, { is_complete: true }) 
+      .then(() => {
+        getData(); 
+      })
+      .catch((error) => {
+        console.log('new task not added to db', error);
+      });
+  };
+
+  const deleteTodo = (id) => {
+    axios.delete(`/api/todo/${id}`)
+      .then(() => {
+        getData(); 
+      })
+      .catch(error => {
+        console.error('Error deleting task', error);
+      });
+  };
+
+  console.log('Todo List:', todoList); 
+
   return (
-  <div className='form-container'>
-    <form onSubmit={addTasks}>
-        <label htmlFor="task">Task</label>
-        <input id="task" onChange={(event) => setNewTodoDescription(event.target.value)} value={newTodoDescription} />
-        <label htmlFor="taskStatus">Task Status:</label>
-        {/* <input id="taskStatus" onChange={(event) => setNewIs_complete(event.target.value)} value={newIs_complete} /> */}
-        <button type="submit">Submit</button>
-      </form>
- 
-   <div>
-    <p>
-      {todoList.map((todo)=>{
-        return (
-       <>
-          <p>{todo.description}</p>
-          <p>{todo.is_complete}</p>
-        
+    <div>
+      <h1>To Do List</h1>
 
-          <button>Complete</button>
-          <button>Remove</button>
-       </>
+      <div className='form-container'>
+        <form onSubmit={addTodo}>
+          <label htmlFor="description">Task</label> <br />
+          <input 
+            id="description" 
+            onChange={(event) => setNewDescription(event.target.value)} 
+            value={newDescription} 
+            placeholder="Enter task here" 
+          /> <br />
+          <button type="submit">Add Task</button>
+        </form>
+      </div>
 
-        )
-      })}
-    </p>
-  </div>
-</div>
+      <div className='todo-container'>
+        <ul>
+          {todoList.map(todo => (
+            <li key={todo.id}>
+              <p> Task: {todo.description}</p> 
+      
+              <div className='buttons'>
+                <button 
+                  onClick={() => markCompleted(todo.id)} 
+                  disabled={todo.is_complete} 
+                >
+                  {todo.is_complete ? 'Completed' : 'Complete'}
+                </button>
+                <button className='delete-btn' onClick={() => deleteTodo(todo.id)}>Delete</button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}
 
-  )};
-
-export default App
-
-// import { useState } from 'react';
-
-// function RockCounter(props) {
-  
-//   const [count, setCount] = useState(0); 
- 
-//   const increaseCount = () => { 
-//     setCount(count + 1); 
-//   }; 
- 
-//   const decreaseCount = () => { 
-//     setCount(count - 1); 
-//   }; 
-
-//   const resetCount = () => {
-//    setCount(0);
-//   }
-
-
- 
-
-//   return (
-//     <div>
-//       <h2>{props.name}</h2>
-//       <div>Rocks Picked: {count} </div>
-//       <div>
-//         <button onClick={increaseCount}>Increase</button>
-//         <button onClick={decreaseCount}>Decrease</button>
-//         <button onClick={resetCount}>Reset</button>
-//       </div>
-//     </div>
-//   );
-// }
-
-// export default RockCounter;
+export default App;

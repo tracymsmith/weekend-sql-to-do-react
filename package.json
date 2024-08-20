@@ -17,11 +17,13 @@
     "vitest": "^1.1.2"
   },
   "scripts": {
-    "start": "node --watch server/server.js",
+    "start": "node server/server.js",
     "build": "vite build",
     "client": "vite",
     "server": "nodemon  --watch server server/server.js",
-    "test": "react-scripts test --env=jsdom"
+    "test": "react-scripts test --env=jsdom",
+    "dev": "react-scripts start",
+    "serve": "vite preview"
   },
   "browserslist": {
     "production": [
